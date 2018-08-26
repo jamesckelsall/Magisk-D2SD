@@ -24,5 +24,4 @@ else
     #also mount all xposed module related files
 fi
 
-
 mount -o ro,remount /

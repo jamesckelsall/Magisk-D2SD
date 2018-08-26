@@ -1,5 +1,5 @@
 # Auto detect text files and perform LF normalization
-* text=auto
-*.txt text
-*.sh text
-*.prop text
+* text=auto eol=lf
+*.txt eol=lf
+*.sh eol=lf
+*.prop eol=lf
