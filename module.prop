@@ -1,0 +1,7 @@
+id=dalvik-to-sd
+name=Magisk D2SD
+version=v1
+versionCode=1
+author=jamesckelsall
+description=A short description
+minMagisk=1500
