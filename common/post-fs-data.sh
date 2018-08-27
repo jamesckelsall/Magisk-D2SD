@@ -4,24 +4,57 @@
 MODDIR=${0%/*}
 # This script will be executed in post-fs-data mode
 # More info in the main Magisk thread
+echo $(date) > $MODDIR/post-fs-data-log
+log () {
+  echo "$(date) $1" >> $MODDIR/post-fs-data-log
+}
+log "Logging started"
 
-echo "$(date) Logging started" > $MODDIR/post-fs-data-log
+mount_sdpart2 () {
+  mount -o rw,remount /
+  mkdir /sdpart2
+  busybox mount -w /dev/block/mmcblk1p2 /sdpart2
+  mount -o ro,remount /
+}
 
-mount -o rw,remount /
-mkdir /sdpart2
-busybox mount -w /dev/block/mmcblk1p2 /sdpart2
-busybox mount -w /sdpart2/com.tinyrebel.doctorwholegacy/obb /data/media/obb/com.tinyrebel.doctorwholegacy
-busybox mount -w /sdpart2/com.tinyrebel.doctorwholegacy/app /data/app/com.tinyrebel.doctorwholegacy-1
+mount_dalvik_cache () {
+  mkdir /data/dalvik-cache
+  busybox mount -w /sdpart2/$1 /data/dalvik-cache
+}
 
-file="$MODDIR/../xposed/disable"
-if [ -f "$file" ]
-then
-    echo "$(date) Xposed disabler exists, loading standard dalvik" >> $MODDIR/post-fs-data-log
-    busybox mount -w /sdpart2/dalvik-cache /data/dalvik-cache
-else
-    echo "$(date) Xposed disabler does not exist, loading xposed dalvik" >> $MODDIR/post-fs-data-log
-    busybox mount -w /sdpart2/dalvik-cache-xposed /data/dalvik-cache
-    #also mount all xposed module related files
+mount_data_apk () {
+    mkdir /data/app/$1-1
+    busybox mount -w /sdpart2/$1/app /data/app/$1-1
+}
+
+mount_obb () {
+  mkdir /data/media/obb/$1
+  busybox mount -w /sdpart2/$1/obb /data/media/obb/$1
+}
+
+mount_sdpart2
+
+mount_data_apk "com.google.android.apps.maps"
+mount_data_apk "com.imaginecurve.curve.prd"
+mount_data_apk "com.tinyrebel.doctorwholegacy"
+mount_data_apk "org.videolan.vlc"
+
+mount_obb "com.tinyrebel.doctorwholegacy"
+
+if [ -f "$MODDIR/../xposed/disable" ]
+  then
+    log "Xposed disabled"
+    mount_dalvik_cache "dalvik-cache"
+
+    mount_data_apk "com.google.android.apps.walletnfcrel"
+  else
+    log "Xposed enabled"
+    mount_dalvik_cache "dalvik-cache-xposed"
+
+    mount_data_apk "com.audio.privacy"
+    mount_data_apk "com.ceco.marshmallow.gravitybox"
+    mount_data_apk "eu.chylek.adam.fakewifi"
+    mount_data_apk "fi.veetipaananen.android.disableflagsecure"
+    mount_data_apk "io.noisyfox.butteredtoast"
+    mount_data_apk "me.rapperskull.burnttoastrevived"
 fi
-
-mount -o ro,remount /
