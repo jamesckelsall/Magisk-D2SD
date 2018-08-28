@@ -16,45 +16,16 @@ mount_sdpart2 () {
   busybox mount -w /dev/block/mmcblk1p2 /sdpart2
   mount -o ro,remount /
 }
-
-mount_dalvik_cache () {
-  mkdir /data/dalvik-cache
-  busybox mount -w /sdpart2/$1 /data/dalvik-cache
-}
-
-mount_data_apk () {
-    mkdir /data/app/$1-1
-    busybox mount -w /sdpart2/$1/app /data/app/$1-1
-}
-
-mount_obb () {
-  mkdir /data/media/obb/$1
-  busybox mount -w /sdpart2/$1/obb /data/media/obb/$1
-}
-
 mount_sdpart2
-
-mount_data_apk "com.google.android.apps.maps"
-mount_data_apk "com.imaginecurve.curve.prd"
-mount_data_apk "com.tinyrebel.doctorwholegacy"
-mount_data_apk "org.videolan.vlc"
-
-mount_obb "com.tinyrebel.doctorwholegacy"
-
+mount_dalvik_cache () {
+  mkdir "/data/dalvik-cache"
+  busybox mount -w "/sdpart2/data/dalvik-cache/$1" "/data/dalvik-cache"
+}
 if [ -f "$MODDIR/../xposed/disable" ]
   then
     log "Xposed disabled"
-    mount_dalvik_cache "dalvik-cache"
-
-    mount_data_apk "com.google.android.apps.walletnfcrel"
+    mount_dalvik_cache "standard"
   else
     log "Xposed enabled"
-    mount_dalvik_cache "dalvik-cache-xposed"
-
-    mount_data_apk "com.audio.privacy"
-    mount_data_apk "com.ceco.marshmallow.gravitybox"
-    mount_data_apk "eu.chylek.adam.fakewifi"
-    mount_data_apk "fi.veetipaananen.android.disableflagsecure"
-    mount_data_apk "io.noisyfox.butteredtoast"
-    mount_data_apk "me.rapperskull.burnttoastrevived"
+    mount_dalvik_cache "xposed"
 fi
